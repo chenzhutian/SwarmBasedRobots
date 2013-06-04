@@ -40,6 +40,7 @@ public class Pipe {
 		hashmap_allRobots.put(String.valueOf(x*100+y), r);
 		robotsHelper.put(r, String.valueOf(x*100+y));
 	}
+	
 	public static Target getTargetByLocation(int x,int y){
 		return hashmap_allTargets.get(String.valueOf(x*100+y));
 	}
@@ -50,6 +51,12 @@ public class Pipe {
 		}
 		hashmap_allTargets.put(String.valueOf(x*100+y), t);
 		targetHelper.put(t, String.valueOf(x*100+y));
+	}
+	public static void delTarget(Target t){
+		Pipe.allTargets.remove(t);
+		String id = Pipe.targetHelper.get(t);
+		Pipe.hashmap_allTargets.remove(id);
+		Pipe.targetHelper.remove(t);
 	}
 	public static SubArea getSubAreaByLocation(int m,int n){
 		return hashmap_allSubArea.get(String.valueOf(m*100+n));

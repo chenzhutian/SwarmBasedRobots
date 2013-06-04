@@ -13,28 +13,35 @@ public class Expriment {
 	public Map map;
 	public int sumMass = 0;
 	public static int t = 0;
-	
+
 	public static void main(String[] args) throws Exception {
 		Expriment e = new Expriment();
-		e.init(30, 30);
-		//e.printBounder();
+		e.init(20, 10);
+		// e.printBounder();
+		int p = 0;
+		int tempSumMass;
+		tempSumMass = e.sumMass;
 		while (e.sumMass > 0) {
-///			e.printBounder();
+			// / e.printBounder();
 			int i;
 			Robot tempRobot = null;
 			for (i = 0; i < e.allRobots.size(); ++i) {
 				tempRobot = e.allRobots.get(i);
 				tempRobot.detected(tempRobot.getX(), tempRobot.getY());
-				// System.out.println("Robot("+tempRobot.getX()+","+tempRobot.getY()+")'s state is "+tempRobot.getState());
 			}
+
+//			for (i = 0; i < e.allRobots.size(); ++i) {
+//				tempRobot = e.allRobots.get(i);
+//				tempRobot.getNeighbour();
+//
+//			}
+
 			for (i = 0; i < e.allRobots.size(); ++i) {
 				tempRobot = e.allRobots.get(i);
-				tempRobot.getNeighbour();
+				//tempRobot.pickDestination();
+				tempRobot.pickDestinationByRandom();
 			}
-			for (i = 0; i < e.allRobots.size(); ++i) {
-				tempRobot = e.allRobots.get(i);
-				tempRobot.pickDestination();
-			}
+
 			for (i = 0; i < e.allRobots.size(); ++i) {
 				tempRobot = e.allRobots.get(i);
 				if (tempRobot.tryToRemove() != null) {
@@ -46,45 +53,18 @@ public class Expriment {
 				}
 			}
 			e.printMap();
-			Thread.sleep(500);
+			Thread.sleep(200);
+			if (e.sumMass == tempSumMass) {
+				p++;
+			} else {
+				tempSumMass = e.sumMass;
+				p = 0;
+			}
 			t++;
+			if (p > 100)
+				break;
 		}
-		// e.map.GlobalMap[5][5] = 1;
-		// System.out.println(e.map.GlobalMap[5][5]);
-		// Pipe.globalMap[5][5] = 2;
-		// System.out.println(e.map.GlobalMap[5][5]);
-		// for (int i = 0; i < e.allRobots.size(); ++i) {
-		// Robot tempRobot = e.allRobots.get(i);
-		// if (tempRobot.targetLocation.size() != 0)
-		// System.out.println("robot(" + tempRobot.getX() + ","
-		// + tempRobot.getY() + ")'s Orientation is "
-		// + tempRobot.getOrientation()
-		// + " and its target list is :");
-		// for (int j = 0; j < tempRobot.targetLocation.size(); ++j) {
-		// int tempx = tempRobot.targetLocation.get(j).get("x");
-		// int tempy = tempRobot.targetLocation.get(j).get("y");
-		// System.out.println("(" + tempx + "," + tempy + ")");
-		// }
-		// Robot tempRobot = e.allRobots.get(i);
-		// tempRobot.pickDestination();
-		//
-		// }
-		// ArrayList<HashMap<String, Integer>> list = new ArrayList<>();
-		// HashMap<String, Integer> hp = new HashMap<>();
-		// hp.put("1", 2);
-		// hp.put("3", 4);
-		// list.add(hp);
-		// if(list.contains(hp)){
-		// System.out.println("asdfsdf");
-		// }
-		// if(hp.containsValue(2)){
-		// System.out.println("dddddddddddddddd");
-		// }
-		// hp.remove(2);
-		// if(hp.containsValue(2)){
-		// System.out.println("dddddddddddddddd");
-		// }
-
+		System.out.println(t);
 	}
 
 	public void init(int r, int t) {
@@ -111,7 +91,6 @@ public class Expriment {
 			if (map.GlobalMap[tempx][tempy] == 0) {
 				map.GlobalMap[tempx][tempy] = Map.ROBOT;
 				Robot tempRobot = new Robot(tempx, tempy, 2, 10);
-				tempRobot.setID(i);
 				allRobots.add(tempRobot);
 				Pipe.setRobotByLocation(tempx, tempy, tempRobot);
 				++i;
@@ -127,7 +106,6 @@ public class Expriment {
 		Pipe.allTargets = this.allTargets;
 	}
 
-
 	public void printBounder() {
 		sumMass = 0;
 		Target tempTarget;
@@ -135,8 +113,8 @@ public class Expriment {
 			tempTarget = this.allTargets.get(i);
 			sumMass += tempTarget.getMass();
 		}
-		System.out.println("<====================" + sumMass
-				+ "==========="+t+"===============>");
+		System.out.println("<====================" + sumMass + "==========="
+				+ t + "===============>");
 	}
 
 	public void printMap() {
@@ -144,14 +122,15 @@ public class Expriment {
 		int n = map.getN();
 		int s = map.getS();
 		sumMass = 0;
+
 		Target tempTarget;
 		for (int i = 0; i < this.allTargets.size(); ++i) {
 			tempTarget = this.allTargets.get(i);
 			sumMass += tempTarget.getMass();
 		}
 		// int[][] screen = new int[m * s + 1][n * s + 1];
-		System.out.println("<====================" + sumMass
-				+ "==========="+t+"===============>");
+		System.out.println("<====================" + sumMass + "==========="
+				+ t + "===============>");
 		for (int i = 1; i < (m * s + 1); ++i) {
 			for (int j = 0; j < (n * s + 2); ++j) {
 				if (j == (n * s + 1)) {

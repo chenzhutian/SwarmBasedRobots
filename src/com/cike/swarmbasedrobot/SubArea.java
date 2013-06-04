@@ -81,7 +81,7 @@ public class SubArea {
 	}
 
 	public double getUndetectedGridPrecentage() {
-		return this.undetectedGrids / (this.S * this.S);
+		return (double)this.undetectedGrids / (this.S * this.S);
 	}
 
 	public int detecedAGrid(int i, int j) {
