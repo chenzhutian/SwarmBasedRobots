@@ -12,17 +12,17 @@ public class Expriment {
 	public ArrayList<Robot> allRobots = new ArrayList<>();
 	public Map map;
 	public int sumMass = 0;
-	public static int t = 0;
-
-	public static void main(String[] args) throws Exception {
+	int t = 0;
+	public static void main(String[] args) throws Exception{
 		Expriment e = new Expriment();
-		e.init(20, 10);
-		// e.printBounder();
+
 		int p = 0;
 		int tempSumMass;
+		e.init(20, 10);
+		e.computSumMass();
 		tempSumMass = e.sumMass;
+		
 		while (e.sumMass > 0) {
-			// / e.printBounder();
 			int i;
 			Robot tempRobot = null;
 			for (i = 0; i < e.allRobots.size(); ++i) {
@@ -30,16 +30,16 @@ public class Expriment {
 				tempRobot.detected(tempRobot.getX(), tempRobot.getY());
 			}
 
-//			for (i = 0; i < e.allRobots.size(); ++i) {
-//				tempRobot = e.allRobots.get(i);
-//				tempRobot.getNeighbour();
-//
-//			}
+			 for (i = 0; i < e.allRobots.size(); ++i) {
+			 tempRobot = e.allRobots.get(i);
+			 tempRobot.getNeighbour();
+			
+			 }
 
 			for (i = 0; i < e.allRobots.size(); ++i) {
 				tempRobot = e.allRobots.get(i);
-				//tempRobot.pickDestination();
-				tempRobot.pickDestinationByRandom();
+				tempRobot.pickDestinationByPSO();
+				//tempRobot.pickDestinationByRandom();
 			}
 
 			for (i = 0; i < e.allRobots.size(); ++i) {
@@ -53,20 +53,91 @@ public class Expriment {
 				}
 			}
 			e.printMap();
-			Thread.sleep(200);
+			Thread.sleep(300);
+			//e.computSumMass();
 			if (e.sumMass == tempSumMass) {
 				p++;
 			} else {
 				tempSumMass = e.sumMass;
 				p = 0;
 			}
-			t++;
-			if (p > 100)
-				break;
+			e.t++;
+			if (p > 100)break;
 		}
-		System.out.println(t);
 	}
+//	public static void main(String[] args) throws Exception {
+//		Expriment e = new Expriment();
+//		int sum = 0;
+//		int k = 200;
+//		int min = 33333333;
+//		while (k > 0) {
+//			e = new Expriment();
+//			e.init(20, 10);
+//			int p = 0;
+//			int t = 0;
+//			int tempSumMass;
+//			tempSumMass = e.sumMass;
+//			
+//			while (e.sumMass > 0) {
+//				// / e.printBounder();
+//				int i;
+//				Robot tempRobot = null;
+//				for (i = 0; i < e.allRobots.size(); ++i) {
+//					tempRobot = e.allRobots.get(i);
+//					tempRobot.detected(tempRobot.getX(), tempRobot.getY());
+//				}
+//
+//				// for (i = 0; i < e.allRobots.size(); ++i) {
+//				// tempRobot = e.allRobots.get(i);
+//				// tempRobot.getNeighbour();
+//				//
+//				// }
+//
+//				for (i = 0; i < e.allRobots.size(); ++i) {
+//					tempRobot = e.allRobots.get(i);
+//					tempRobot.pickDestination();
+//					//tempRobot.pickDestinationByRandom();
+//				}
+//
+//				for (i = 0; i < e.allRobots.size(); ++i) {
+//					tempRobot = e.allRobots.get(i);
+//					if (tempRobot.tryToRemove() != null) {
+//						int tempx = tempRobot.tryToRemove().get("x").intValue();
+//						int tempy = tempRobot.tryToRemove().get("y").intValue();
+//						tempRobot.remove(tempx, tempy);
+//					} else {
+//						tempRobot.move();
+//					}
+//				}
+//				e.printMap();
+//				//Thread.sleep(200);
+//				e.computSumMass();
+//				if (e.sumMass == tempSumMass) {
+//					p++;
+//				} else {
+//					tempSumMass = e.sumMass;
+//					p = 0;
+//				}
+//				t++;
+//				if (p > 100)break;
+//			}
+//			if(t<min) min = t;
+//			//System.out.println(t);
+//			sum += t;
+//			k--;
+//		}
+//		System.out.println(sum+" and avg is "+sum/200+", and min is "+min);
+//
+//	}
 
+	public void computSumMass(){
+		sumMass = 0;
+		Target tempTarget;
+		for (int i = 0; i < this.allTargets.size(); ++i) {
+			tempTarget = this.allTargets.get(i);
+			sumMass += tempTarget.getMass();
+		}
+	}
 	public void init(int r, int t) {
 		// step1
 		// 初始化地图，随机分布机器人和目标
@@ -106,16 +177,16 @@ public class Expriment {
 		Pipe.allTargets = this.allTargets;
 	}
 
-	public void printBounder() {
-		sumMass = 0;
-		Target tempTarget;
-		for (int i = 0; i < this.allTargets.size(); ++i) {
-			tempTarget = this.allTargets.get(i);
-			sumMass += tempTarget.getMass();
-		}
-		System.out.println("<====================" + sumMass + "==========="
-				+ t + "===============>");
-	}
+//	public void printBounder() {
+//		sumMass = 0;
+//		Target tempTarget;
+//		for (int i = 0; i < this.allTargets.size(); ++i) {
+//			tempTarget = this.allTargets.get(i);
+//			sumMass += tempTarget.getMass();
+//		}
+//		System.out.println("<====================" + sumMass + "==========="
+//				+ t + "===============>");
+//	}
 
 	public void printMap() {
 		int m = map.getM();
@@ -128,7 +199,6 @@ public class Expriment {
 			tempTarget = this.allTargets.get(i);
 			sumMass += tempTarget.getMass();
 		}
-		// int[][] screen = new int[m * s + 1][n * s + 1];
 		System.out.println("<====================" + sumMass + "==========="
 				+ t + "===============>");
 		for (int i = 1; i < (m * s + 1); ++i) {

@@ -396,7 +396,7 @@ public class Robot {
 		this.destination.put("y", this.y + tempy);
 	}
 
-	public void pickDestination() {
+	public void pickDestinationByMotifyPSO() {
 		HashMap<String, Integer> hash;
 		HashMap<String, Integer> maxLocation = null;
 		int tempx = S;
@@ -418,11 +418,6 @@ public class Robot {
 				}
 				Double D = Map.distance(this.x, this.y, tempTarget.getX(),
 						tempTarget.getY());
-				// if(tempTarget.getMass() == 0){
-				// this.targetLocation.remove(hash);
-				// Pipe.delTarget(tempTarget);
-				// continue;
-				// }
 				tempU = tempTarget.getMass() / D;
 				if (tempU >= maxU) {
 					maxU = tempU;
@@ -453,6 +448,142 @@ public class Robot {
 				}
 			}
 			// TODO 偏移没写
+		}
+			break;
+		case Robot.ROBOT_SEARCHING: {
+			int m = this.subAreaLocation.get("m");
+			int n = this.subAreaLocation.get("n");
+			SubArea tempSubArea = Pipe.getSubAreaByLocation(m, n);
+			if (tempSubArea.getUndetectedGridPrecentage() > 0.01) {
+				for (int i = 0; i < S; ++i) {
+					for (int j = 0; j < S; ++j) {
+						if (tempSubArea.getGrids()[i][j] == 0) {
+							hash = Map.subArea2Global(i, j, m, n, S);
+							tempx = hash.get("x");
+							tempy = hash.get("y");
+							tempU = Map.distance(tempx, tempy, this.x, this.y);
+							if (tempU >= maxU) {
+								maxU = tempU;
+								maxLocation = hash;
+							}
+						}
+					}
+				}
+				tempx = maxLocation.get("x") - this.x;
+				tempy = maxLocation.get("y") - this.y;
+				double temp = rd.nextFloat();
+				tempx = (int) (2 * temp * tempx + 0.6 * velocity.get("x"));
+				tempy = (int) (2 * temp * tempy + 0.6 * velocity.get("y"));
+				if (!((Math.abs(tempx) > (S / 2)) || (Math.abs(tempy) > (S / 2)))) {
+					this.velocity = new HashMap<>();
+					this.velocity.put("x", tempx);
+					this.velocity.put("y", tempy);
+					this.destination = new HashMap<>();
+					this.destination.put("x", this.x + tempx);
+					this.destination.put("y", this.y + tempy);
+				} else {
+					tempx = this.x + this.velocity.get("x").intValue();
+					tempy = this.y + this.velocity.get("y").intValue();
+					this.destination = new HashMap<>();
+					this.destination.put("x", tempx);
+					this.destination.put("y", tempy);
+				}
+			} else {
+				this.subAreaOfGlobalMap[tempSubArea.getM()][tempSubArea.getN()] = 1;
+				for (int i = 0; i < Pipe.allSubArea.size(); ++i) {
+					tempSubArea = Pipe.allSubArea.get(i);
+					if (this.subAreaOfGlobalMap[tempSubArea.getM()][tempSubArea
+							.getN()] != 1) {
+						hash = tempSubArea.getCenterLocation();
+						double d = Map.distance(this.x, this.y,
+								tempSubArea.getCenterX(),
+								tempSubArea.getCenterY());
+						tempU = (tempSubArea.getB() * tempSubArea
+								.getUndetectedGrids()) / d;
+						if (tempU > maxU) {
+							maxU = tempU;
+							maxLocation = hash;
+						}
+					}
+				}
+				if (maxLocation != null) {
+					tempx = maxLocation.get("x") - this.x;
+					tempy = maxLocation.get("y") - this.y;
+					double temp = rd.nextFloat();
+					tempx = (int) (temp * tempx + 0.6 * velocity.get("x"));
+					tempy = (int) (temp * tempy + 0.6 * velocity.get("y"));
+				}
+				if (!((Math.abs(tempx) > (S / 2)) || (Math.abs(tempy) > (S / 2)))) {
+					this.velocity = new HashMap<>();
+					this.velocity.put("x", tempx);
+					this.velocity.put("y", tempy);
+					this.destination = new HashMap<>();
+					this.destination.put("x", this.x + tempx);
+					this.destination.put("y", this.y + tempy);
+
+				} else {
+					tempx = this.x + this.velocity.get("x");
+					tempy = this.y + this.velocity.get("y");
+					this.destination = new HashMap<>();
+					this.destination.put("x", tempx);
+					this.destination.put("y", tempy);
+				}
+			}
+		}
+		}
+	}
+
+	public void pickDestinationByPSO() {
+		HashMap<String, Integer> hash;
+		HashMap<String, Integer> maxLocation = null;
+		int tempx = S;
+		int tempy = S;
+		double maxU = 0;
+		double tempU;
+
+		switch (this.state) {
+		case Robot.ROBOT_REMOVING: {
+			Target tempTarget;
+			// 找效用函数最大的目标
+			for (int i = 0; i < this.targetLocation.size(); ++i) {
+				hash = this.targetLocation.get(i);
+				tempTarget = Pipe.getTargetByLocation(hash.get("x"),
+						hash.get("y"));
+				if (tempTarget == null) {// 若目标不存在则在列表中删除目标
+					this.targetLocation.remove(hash);
+					continue;
+				}
+				Double D = Map.distance(this.x, this.y, tempTarget.getX(),
+						tempTarget.getY());
+				tempU = tempTarget.getMass() / D;
+				if (tempU >= maxU) {
+					maxU = tempU;
+					maxLocation = hash;
+				}
+			}
+			if (maxLocation != null) {
+				tempx = maxLocation.get("x") - this.x;
+				tempy = maxLocation.get("y") - this.y;
+				double temp = rd.nextFloat();
+				tempx = (int) (2 * temp * tempx + 0.6 * velocity.get("x"));
+				tempy = (int) (2 * temp * tempy + 0.6 * velocity.get("y"));
+			} else {
+				this.state = Robot.ROBOT_SEARCHING;
+			}
+			if (!((Math.abs(tempx) > (S)) || (Math.abs(tempy) > (S)))) {
+				this.velocity = new HashMap<>();
+				this.velocity.put("x", tempx);
+				this.velocity.put("y", tempy);
+				this.destination = new HashMap<>();
+				this.destination.put("x", this.x + tempx);
+				this.destination.put("y", this.y + tempy);
+			} else {
+				tempx = this.x + this.velocity.get("x");
+				tempy = this.y + this.velocity.get("y");
+				this.destination = new HashMap<>();
+				this.destination.put("x", tempx);
+				this.destination.put("y", tempy);
+			}
 		}
 			break;
 		case Robot.ROBOT_SEARCHING: {
@@ -690,10 +821,8 @@ public class Robot {
 	}
 
 	public void move() {
-		int tempx;
-		int tempy;
-		tempx = this.destination.get("x").intValue();
-		tempy = this.destination.get("y").intValue();
+		int tempx = this.destination.get("x").intValue();
+		int tempy = this.destination.get("y").intValue();
 		if (Pipe.getGlobalMap(tempx, tempy) != 0) {
 			this.destination = this.findEmpty(tempx, tempy);
 			tempx = this.destination.get("x").intValue();
@@ -714,53 +843,80 @@ public class Robot {
 
 	public HashMap<String, Integer> findEmpty(int x, int y) {
 		HashMap<String, Integer> hash = null;
+		int tempx;
+		int tempy;
 		switch (Pipe.getGlobalMap(x, y)) {
 		case Map.ROBOT:
-		case Map.TARGET:
+		case Map.TARGET: {
+			int k = 0;
 			hash = new HashMap<>();
-			if (Pipe.getGlobalMap(x + 1, y) == 0) {
-				hash.put("x", x + 1);
-				hash.put("y", y);
-				return hash;
-			} else if (Pipe.getGlobalMap(x - 1, y) == 0) {
-				hash.put("x", x - 1);
-				hash.put("y", y);
-				return hash;
-			} else if (Pipe.getGlobalMap(x, y + 1) == 0) {
-				hash.put("x", x);
-				hash.put("y", y + 1);
-				return hash;
-			} else if (Pipe.getGlobalMap(x, y - 1) == 0) {
-				hash.put("x", x);
-				hash.put("y", y - 1);
-				return hash;
-			} else if (Pipe.getGlobalMap(x + 1, y + 1) == 0) {
-				hash.put("x", x + 1);
-				hash.put("y", y + 1);
-				return hash;
-			} else if (Pipe.getGlobalMap(x - 1, y + 1) == 0) {
-				hash.put("x", x - 1);
-				hash.put("y", y + 1);
-				return hash;
-			} else if (Pipe.getGlobalMap(x + 1, y - 1) == 0) {
-				hash.put("x", x + 1);
-				hash.put("y", y - 1);
-				return hash;
-			} else if (Pipe.getGlobalMap(x - 1, y - 1) == 0) {
-				hash.put("x", x - 1);
-				hash.put("y", y - 1);
-				return hash;
+			while (k < 8) {
+				switch (rd.nextInt(8)) {
+				case 0:
+					if (Pipe.getGlobalMap(x + 1, y) == 0) {
+						hash.put("x", x + 1);
+						hash.put("y", y);
+						return hash;
+					}
+					break;
+				case 1:
+					if (Pipe.getGlobalMap(x - 1, y) == 0) {
+						hash.put("x", x - 1);
+						hash.put("y", y);
+						return hash;
+					}
+					break;
+				case 2:
+					if (Pipe.getGlobalMap(x, y + 1) == 0) {
+						hash.put("x", x);
+						hash.put("y", y + 1);
+						return hash;
+					}
+					break;
+				case 3:
+					if (Pipe.getGlobalMap(x, y - 1) == 0) {
+						hash.put("x", x);
+						hash.put("y", y - 1);
+						return hash;
+					}
+					break;
+				case 4:
+					if (Pipe.getGlobalMap(x + 1, y + 1) == 0) {
+						hash.put("x", x + 1);
+						hash.put("y", y + 1);
+						return hash;
+					}
+					break;
+				case 5:
+					if (Pipe.getGlobalMap(x - 1, y + 1) == 0) {
+						hash.put("x", x - 1);
+						hash.put("y", y + 1);
+						return hash;
+					}
+					break;
+				case 6:
+					if (Pipe.getGlobalMap(x + 1, y - 1) == 0) {
+						hash.put("x", x + 1);
+						hash.put("y", y - 1);
+						return hash;
+					}
+					break;
+				case 7:
+					if (Pipe.getGlobalMap(x - 1, y - 1) == 0) {
+						hash.put("x", x - 1);
+						hash.put("y", y - 1);
+						return hash;
+					}
+					break;
+				}
 			}
 		}
-		int tempx = this.velocity.get("x").intValue();
-		int tempy = this.velocity.get("y").intValue();
+		}
+		tempx = this.velocity.get("x").intValue();
+		tempy = this.velocity.get("y").intValue();
 		this.velocity = new HashMap<>();
 		this.velocity.put("x", -tempx);
 		this.velocity.put("y", -tempy);
-		// this.destination = new HashMap<>();
-		// this.destination.put("x", this.x - tempx);
-		// this.destination.put("y", this.y - tempy);
-		// return this.destination;
 		return this.location;
 	}
 
