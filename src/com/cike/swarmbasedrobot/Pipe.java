@@ -7,6 +7,7 @@ public class Pipe {
 	public static int m;
 	public static int n;
 	public static int S;
+	public static int SumMass;
 	public static ArrayList<Robot> list_allRobots = new ArrayList<>();
 	public static ArrayList<Target> allTargets = new ArrayList<>();
 	public static ArrayList<SubArea> allSubArea = new ArrayList<>();

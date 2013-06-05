@@ -18,8 +18,26 @@ public class Target {
 		this.y = 1;
 	}
 
-	public Target(int x, int y) {
-		this.mass = 10 + rd.nextInt(40);
+	public Target(int x, int y,int id,int num,int k) {
+		this.Id = id;
+		switch(k){
+		case 0:
+			if(id != num-1){
+				this.mass = -5+rd.nextInt(10)+Pipe.SumMass/(num-id);
+				Pipe.SumMass -= this.mass;
+			}
+			else
+				this.mass = Pipe.SumMass;
+			break;
+		case 1:
+			if(id != num-1){
+				this.mass = 1+rd.nextInt(Pipe.SumMass/(num));
+				Pipe.SumMass -= this.mass;
+			}
+			else
+				this.mass = Pipe.SumMass;
+			break;
+		}
 		this.setLocation(x, y);
 	}
 
